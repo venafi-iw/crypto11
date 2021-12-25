@@ -29,7 +29,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	pkcs11 "github.com/miekg/pkcs11"
+	pkcs11 "github.com/venafi-iw/pkcs11"
 )
 
 // pkcs11PrivateKeyDSA contains a reference to a loaded PKCS#11 DSA private key object.

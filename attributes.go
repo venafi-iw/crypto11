@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/miekg/pkcs11"
+	"github.com/venafi-iw/pkcs11"
 )
 
 // AttributeType represents a PKCS#11 CK_ATTRIBUTE value.

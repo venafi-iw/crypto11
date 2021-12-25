@@ -31,7 +31,7 @@ import (
 	_ "crypto/sha512"
 	"testing"
 
-	"github.com/miekg/pkcs11"
+	"github.com/venafi-iw/pkcs11"
 
 	"github.com/stretchr/testify/assert"
 

@@ -31,8 +31,8 @@ import (
 	_ "crypto/sha512"
 	"testing"
 
-	"github.com/miekg/pkcs11"
 	"github.com/stretchr/testify/require"
+	"github.com/venafi-iw/pkcs11"
 )
 
 // Set to 2048, as most tokens will support this. 1024 not supported by some tokens (e.g. Amazon CloudHSM).

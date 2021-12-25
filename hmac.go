@@ -25,7 +25,7 @@ import (
 	"errors"
 	"hash"
 
-	"github.com/miekg/pkcs11"
+	"github.com/venafi-iw/pkcs11"
 )
 
 const (

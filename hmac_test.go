@@ -24,8 +24,8 @@ package crypto11
 import (
 	"testing"
 
-	"github.com/miekg/pkcs11"
 	"github.com/stretchr/testify/require"
+	"github.com/venafi-iw/pkcs11"
 )
 
 func TestHmac(t *testing.T) {

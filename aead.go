@@ -26,7 +26,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/miekg/pkcs11"
+	"github.com/venafi-iw/pkcs11"
 )
 
 // cipher.AEAD ----------------------------------------------------------

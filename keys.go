@@ -24,8 +24,9 @@ package crypto11
 import (
 	"crypto"
 	"crypto/x509"
-	"github.com/miekg/pkcs11"
+
 	"github.com/pkg/errors"
+	"github.com/venafi-iw/pkcs11"
 )
 
 const maxHandlePerFind = 20

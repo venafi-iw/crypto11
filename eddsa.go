@@ -22,45 +22,18 @@
 package crypto11
 
 import (
-	"bytes"
 	"crypto"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"encoding/asn1"
 	"io"
-	"math/big"
 
-	"github.com/pkg/errors"
 	"github.com/venafi-iw/pkcs11"
 )
 
-// errUnsupportedEllipticCurve is returned when an elliptic curve
-// unsupported by crypto11 is specified.  Note that the error behavior
-// for an elliptic curve unsupported by the underlying PKCS#11
-// implementation will be different.
-var errUnsupportedEllipticCurve = errors.New("unsupported elliptic curve")
-
 // pkcs11PrivateKeyECDSA contains a reference to a loaded PKCS#11 ECDSA private key object.
-type pkcs11PrivateKeyECDSA struct {
+type pkcs11PrivateKeyEDDSA struct {
 	pkcs11PrivateKey
-}
-
-// Information about an Elliptic Curve
-type curveInfo struct {
-	// ASN.1 marshaled OID
-	oid []byte
-
-	// Curve definition in Go form
-	curve elliptic.Curve
-}
-
-// ASN.1 marshal some value and panic on error
-func mustMarshal(val interface{}) []byte {
-	if b, err := asn1.Marshal(val); err != nil {
-		panic(err)
-	} else {
-		return b
-	}
 }
 
 // Note: some of these are outside what crypto/elliptic currently
@@ -71,114 +44,15 @@ func mustMarshal(val interface{}) []byte {
 // For public key export, the curve has to be a known one, otherwise
 // you're stuffed. This is probably better fixed by adding well-known
 // curves to crypto/elliptic rather than having a private copy here.
-var wellKnownCurves = map[string]curveInfo{
-	"P-192": {
+var eddsaCurve = map[string]curveInfo{
+	"EDDSA": {
 		mustMarshal(asn1.ObjectIdentifier{1, 2, 840, 10045, 3, 1, 1}),
 		nil,
 	},
-	"P-224": {
-		mustMarshal(asn1.ObjectIdentifier{1, 3, 132, 0, 33}),
-		elliptic.P224(),
-	},
-	"P-256": {
-		mustMarshal(asn1.ObjectIdentifier{1, 2, 840, 10045, 3, 1, 7}),
-		elliptic.P256(),
-	},
-	"P-384": {
-		mustMarshal(asn1.ObjectIdentifier{1, 3, 132, 0, 34}),
-		elliptic.P384(),
-	},
-	"P-521": {
-		mustMarshal(asn1.ObjectIdentifier{1, 3, 132, 0, 35}),
-		elliptic.P521(),
-	},
-
-	"K-163": {
-		mustMarshal(asn1.ObjectIdentifier{1, 3, 132, 0, 1}),
-		nil,
-	},
-	"K-233": {
-		mustMarshal(asn1.ObjectIdentifier{1, 3, 132, 0, 26}),
-		nil,
-	},
-	"K-283": {
-		mustMarshal(asn1.ObjectIdentifier{1, 3, 132, 0, 16}),
-		nil,
-	},
-	"K-409": {
-		mustMarshal(asn1.ObjectIdentifier{1, 3, 132, 0, 36}),
-		nil,
-	},
-	"K-571": {
-		mustMarshal(asn1.ObjectIdentifier{1, 3, 132, 0, 38}),
-		nil,
-	},
-
-	"B-163": {
-		mustMarshal(asn1.ObjectIdentifier{1, 3, 132, 0, 15}),
-		nil,
-	},
-	"B-233": {
-		mustMarshal(asn1.ObjectIdentifier{1, 3, 132, 0, 27}),
-		nil,
-	},
-	"B-283": {
-		mustMarshal(asn1.ObjectIdentifier{1, 3, 132, 0, 17}),
-		nil,
-	},
-	"B-409": {
-		mustMarshal(asn1.ObjectIdentifier{1, 3, 132, 0, 37}),
-		nil,
-	},
-	"B-571": {
-		mustMarshal(asn1.ObjectIdentifier{1, 3, 132, 0, 39}),
-		nil,
-	},
-}
-
-func marshalEcParams(c elliptic.Curve) ([]byte, error) {
-	if ci, ok := wellKnownCurves[c.Params().Name]; ok {
-		return ci.oid, nil
-	}
-	// TODO use ANSI X9.62 ECParameters representation instead
-	return nil, errUnsupportedEllipticCurve
-}
-
-func unmarshalEcParams(b []byte) (elliptic.Curve, error) {
-	// See if it's a well-known curve
-	for _, ci := range wellKnownCurves {
-		if bytes.Equal(b, ci.oid) {
-			if ci.curve != nil {
-				return ci.curve, nil
-			}
-			return nil, errUnsupportedEllipticCurve
-		}
-	}
-	// TODO try ANSI X9.62 ECParameters representation
-	return nil, errUnsupportedEllipticCurve
-}
-
-func unmarshalEcPoint(b []byte, c elliptic.Curve) (*big.Int, *big.Int, error) {
-	var pointBytes []byte
-	extra, err := asn1.Unmarshal(b, &pointBytes)
-	if err != nil {
-		return nil, nil, errors.WithMessage(err, "elliptic curve point is invalid ASN.1")
-	}
-
-	if len(extra) > 0 {
-		// We weren't expecting extra data
-		return nil, nil, errors.New("unexpected data found when parsing elliptic curve point")
-	}
-
-	x, y := elliptic.Unmarshal(c, pointBytes)
-	if x == nil || y == nil {
-		return nil, nil, errors.New("failed to parse elliptic curve point")
-	}
-	return x, y, nil
 }
 
 // Export the public key corresponding to a private ECDSA key.
-func exportECDSAPublicKey(session *pkcs11Session, pubHandle pkcs11.ObjectHandle) (crypto.PublicKey, error) {
+func exportEDDSAPublicKey(session *pkcs11Session, pubHandle pkcs11.ObjectHandle) (crypto.PublicKey, error) {
 	var err error
 	var attributes []*pkcs11.Attribute
 	var pub ecdsa.PublicKey
@@ -201,7 +75,7 @@ func exportECDSAPublicKey(session *pkcs11Session, pubHandle pkcs11.ObjectHandle)
 // GenerateECDSAKeyPair creates a ECDSA key pair on the token using curve c. The id parameter is used to
 // set CKA_ID and must be non-nil. Only a limited set of named elliptic curves are supported. The
 // underlying PKCS#11 implementation may impose further restrictions.
-func (c *Context) GenerateECDSAKeyPair(id []byte, curve elliptic.Curve) (Signer, error) {
+func (c *Context) GenerateEDDSAKeyPair(id []byte, curve elliptic.Curve) (Signer, error) {
 	if c.closed.Get() {
 		return nil, errClosed
 	}
@@ -219,7 +93,7 @@ func (c *Context) GenerateECDSAKeyPair(id []byte, curve elliptic.Curve) (Signer,
 // GenerateECDSAKeyPairWithLabel creates a ECDSA key pair on the token using curve c. The id and label parameters are used to
 // set CKA_ID and CKA_LABEL respectively and must be non-nil. Only a limited set of named elliptic curves are supported. The
 // underlying PKCS#11 implementation may impose further restrictions.
-func (c *Context) GenerateECDSAKeyPairWithLabel(id, label []byte, curve elliptic.Curve) (Signer, error) {
+func (c *Context) GenerateEDDSAKeyPairWithLabel(id, label []byte, curve elliptic.Curve) (Signer, error) {
 	if c.closed.Get() {
 		return nil, errClosed
 	}
@@ -237,7 +111,7 @@ func (c *Context) GenerateECDSAKeyPairWithLabel(id, label []byte, curve elliptic
 // GenerateECDSAKeyPairWithAttributes generates an ECDSA key pair on the token. After this function returns, public and
 // private will contain the attributes applied to the key pair. If required attributes are missing, they will be set to
 // a default value.
-func (c *Context) GenerateECDSAKeyPairWithAttributes(public, private AttributeSet, curve elliptic.Curve) (Signer, error) {
+func (c *Context) GenerateEDDSAKeyPairWithAttributes(public, private AttributeSet, curve elliptic.Curve) (Signer, error) {
 	if c.closed.Get() {
 		return nil, errClosed
 	}
@@ -290,13 +164,13 @@ func (c *Context) GenerateECDSAKeyPairWithAttributes(public, private AttributeSe
 	return k, err
 }
 
-// Sign signs a message using an ECDSA key.
+// Sign signs a message using an EDDSA key.
 //
-// This completes the implemention of crypto.Signer for pkcs11PrivateKeyECDSA.
+// This completes the implemention of crypto.Signer for pkcs11PrivateKeyEDDSA.
 //
 // PKCS#11 expects to pick its own random data where necessary for signatures, so the rand argument is ignored.
 //
 // The return value is a DER-encoded byteblock.
-func (signer *pkcs11PrivateKeyECDSA) Sign(rand io.Reader, digest []byte, opts crypto.SignerOpts) ([]byte, error) {
-	return signer.context.dsaGeneric(signer.handle, pkcs11.CKM_ECDSA, digest)
+func (signer *pkcs11PrivateKeyEDDSA) Sign(rand io.Reader, digest []byte, opts crypto.SignerOpts) ([]byte, error) {
+	return signer.context.dsaGeneric(signer.handle, pkcs11.CKM_EDDSA, digest)
 }

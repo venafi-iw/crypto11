@@ -27,8 +27,8 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/miekg/pkcs11"
 	"github.com/stretchr/testify/require"
+	"github.com/venafi-iw/pkcs11"
 )
 
 func TestHardSymmetric(t *testing.T) {

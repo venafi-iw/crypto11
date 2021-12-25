@@ -27,8 +27,8 @@ import (
 	"math/big"
 	"unsafe"
 
-	"github.com/miekg/pkcs11"
 	"github.com/pkg/errors"
+	"github.com/venafi-iw/pkcs11"
 )
 
 func ulongToBytes(n uint) []byte {
@@ -50,7 +50,7 @@ func bytesToUlong(bs []byte) (n uint) {
 	// the unsafe pointer will always grab/convert ULONG # of bytes
 	var mask uint
 	for i := 0; i < sliceSize; i++ {
-		mask |= 0xff << uint(i * 8)
+		mask |= 0xff << uint(i*8)
 	}
 	return value & mask
 }

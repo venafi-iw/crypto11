@@ -24,7 +24,7 @@ package crypto11
 import (
 	"errors"
 
-	"github.com/miekg/pkcs11"
+	"github.com/venafi-iw/pkcs11"
 )
 
 // SymmetricGenParams holds a consistent (key type, mechanism) key generation pair.

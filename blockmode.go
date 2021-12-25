@@ -25,7 +25,7 @@ import (
 	"crypto/cipher"
 	"runtime"
 
-	"github.com/miekg/pkcs11"
+	"github.com/venafi-iw/pkcs11"
 )
 
 // cipher.BlockMode -----------------------------------------------------

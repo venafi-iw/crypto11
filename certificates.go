@@ -27,8 +27,8 @@ import (
 	"encoding/asn1"
 	"math/big"
 
-	"github.com/miekg/pkcs11"
 	"github.com/pkg/errors"
+	"github.com/venafi-iw/pkcs11"
 )
 
 // FindCertificate retrieves a previously imported certificate. Any combination of id, label

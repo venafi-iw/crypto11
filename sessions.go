@@ -25,8 +25,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/miekg/pkcs11"
 	"github.com/thales-e-security/pool"
+	"github.com/venafi-iw/pkcs11"
 )
 
 // pkcs11Session wraps a PKCS#11 session handle so we can use it in a resource pool.

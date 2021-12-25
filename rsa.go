@@ -28,7 +28,7 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/miekg/pkcs11"
+	"github.com/venafi-iw/pkcs11"
 )
 
 // errMalformedRSAPublicKey is returned when an RSA public key is not in a suitable form.

@@ -97,9 +97,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/miekg/pkcs11"
 	"github.com/pkg/errors"
 	"github.com/thales-e-security/pool"
+	"github.com/venafi-iw/pkcs11"
 )
 
 const (
